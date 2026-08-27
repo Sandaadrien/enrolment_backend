@@ -23,7 +23,7 @@ model address {
 model agent {
   id                  String           @id(map: "pk_tbl_1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   person_id           String           @db.Uuid
-  username            String           @db.VarChar(255)
+  username            String           @unique @db.VarChar(255)
   password_hash       String           @db.VarChar(255)
   id_application_role String           @db.Uuid
   id_centre           String           @db.Uuid
@@ -104,7 +104,7 @@ model country {
   created_at       DateTime  @default(now()) @db.Timestamptz(6)
   updated_at       DateTime? @db.Timestamptz(6)
   person           person[]
-  region           region?
+  region           region[]
 }
 
 model district {
@@ -118,48 +118,48 @@ model district {
 }
 
 model document {
-  id               String        @id(map: "pk_document") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  enrolment_id     String        @db.Uuid
-  document_type_id String        @db.Uuid
-  front_file_path  String
-  back_file_path   String?
-  document_type    document_type @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_document_type")
-  enrolment        enrolment     @relation(fields: [enrolment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_enrolment")
+  id                  String                @id(map: "pk_document") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  enrolment_id        String                @db.Uuid
+  document_type_id    String                @db.Uuid
+  front_file_path     String
+  back_file_path      String?
+  document_type       document_type         @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_document_type")
+  enrolment           enrolment             @relation(fields: [enrolment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_enrolment")
+  document_mrz        document_mrz[]
+  document_ocr_result document_ocr_result[]
 }
 
 model document_mrz {
-  id            String        @id(map: "pk_document_mrz") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_id   String        @db.Uuid
+  id            String   @id(map: "pk_document_mrz") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id   String   @db.Uuid
   raw_mrz       String
-  processed_at  DateTime      @default(now()) @db.Timestamptz(6)
-  document_type document_type @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_mrz_document_type")
+  processed_at  DateTime @default(now()) @db.Timestamptz(6)
+  document_type document @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_mrz_document_type")
 }
 
 model document_ocr_result {
-  id               String        @id(map: "pk_document_ocr_result") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_id      String        @db.Uuid
-  engine_name      String        @db.VarChar(255)
-  engine_version   String        @db.VarChar(255)
+  id               String   @id(map: "pk_document_ocr_result") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id      String   @db.Uuid
+  engine_name      String   @db.VarChar(255)
+  engine_version   String   @db.VarChar(255)
   extracted_text   String
-  confidence_score Decimal       @default(0) @db.Decimal(5, 2)
-  processed_at     DateTime      @default(now()) @db.Timestamptz(6)
-  document_type    document_type @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_ocr_result_document_type")
+  confidence_score Decimal  @default(0) @db.Decimal(5, 2)
+  processed_at     DateTime @default(now()) @db.Timestamptz(6)
+  document_type    document @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_ocr_result_document_type")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model document_type {
-  id                  String                @id(map: "pk_document_type") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String                @db.VarChar(255)
-  description         String?
-  evidence_strength   evidence_strength     @default(WEAK)
-  requires_mrz        Boolean               @default(false)
-  supports_ocr        Boolean               @default(false)
-  requires_original   Boolean               @default(true)
-  created_at          DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?             @db.Timestamptz(6)
-  document            document[]
-  document_mrz        document_mrz[]
-  document_ocr_result document_ocr_result[]
+  id                String            @id(map: "pk_document_type") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String            @db.VarChar(255)
+  description       String?
+  evidence_strength evidence_strength @default(WEAK)
+  requires_mrz      Boolean           @default(false)
+  supports_ocr      Boolean           @default(false)
+  requires_original Boolean           @default(true)
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?         @db.Timestamptz(6)
+  document          document[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -225,7 +225,7 @@ model person {
 
 model region {
   id         String     @id(map: "pk_tbl_0") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  country_id String     @unique(map: "unq_region_country_id") @db.Uuid
+  country_id String     @db.Uuid
   name       String     @db.VarChar(255)
   created_at DateTime   @default(now()) @db.Timestamptz(6)
   updated_at DateTime?  @db.Timestamptz(6)
