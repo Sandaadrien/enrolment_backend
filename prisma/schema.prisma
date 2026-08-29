@@ -1,0 +1,281 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model address {
+  id             String          @id(map: "pk_address") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_person      String          @db.Uuid
+  house_number   String          @db.VarChar(255)
+  id_fokontany   String          @db.Uuid
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @db.Timestamptz(6)
+  occupancy_type occupancy_type? @default(OWNER)
+  fokontany      fokontany       @relation(fields: [id_fokontany], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_fokontany")
+  person         person          @relation(fields: [id_person], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_person")
+}
+
+model agent {
+  id                  String           @id(map: "pk_tbl_1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  person_id           String           @db.Uuid
+  username            String           @unique @db.VarChar(255)
+  password_hash       String           @db.VarChar(255)
+  id_application_role String           @db.Uuid
+  id_centre           String           @db.Uuid
+  application_role    application_role @relation(fields: [id_application_role], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_application_role")
+  centre              centre           @relation(fields: [id_centre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_centre")
+  person              person           @relation(fields: [person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_person")
+  enrolment           enrolment[]
+}
+
+model application_role {
+  id          String  @id(map: "pk_application_role") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @db.VarChar(255)
+  description String?
+  agent       agent[]
+}
+
+model centre {
+  id           String    @id(map: "pk_centre") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code         String?   @db.VarChar(255)
+  name         String    @db.VarChar(255)
+  id_fokontany String    @db.Uuid
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  agent        agent[]
+  fokontany    fokontany @relation(fields: [id_fokontany], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_centre_fokontany")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model citizen {
+  id                                                                   String                 @id(map: "pk_citizen") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  person_id                                                            String                 @db.Uuid
+  created_at                                                           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at                                                           DateTime?              @db.Timestamptz(6)
+  national_unique_id                                                   String
+  person                                                               person                 @relation(fields: [person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_citizen_person")
+  citizen_account                                                      citizen_account[]
+  enrolment                                                            enrolment[]
+  family_relationships_family_relationships_citizen_idTocitizen        family_relationships[] @relation("family_relationships_citizen_idTocitizen")
+  family_relationships_family_relationships_related_person_idTocitizen family_relationships[] @relation("family_relationships_related_person_idTocitizen")
+}
+
+model citizen_account {
+  id                     String    @id(map: "pk_citizen_account") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_citizen             String    @db.Uuid
+  password_hash          String    @db.VarChar(255)
+  is_empreinte_activated Boolean   @default(false)
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @db.Timestamptz(6)
+  citizen                citizen   @relation(fields: [id_citizen], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_citizen_account_citizen")
+}
+
+model commune {
+  id          String      @id(map: "pk_commune") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  district_id String      @db.Uuid
+  name        String      @db.VarChar(255)
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?   @db.Timestamptz(6)
+  district    district    @relation(fields: [district_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_commune_district")
+  fokontany   fokontany[]
+}
+
+model contact_method {
+  id          String        @id(map: "pk_contact_method") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  person_id   String        @db.Uuid
+  type        contact_type?
+  is_verified Boolean       @default(false)
+  value       String        @db.VarChar(255)
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  is_primary  Boolean       @default(false)
+  person      person        @relation(fields: [person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_contact_method_person")
+}
+
+model country {
+  id               String    @id(map: "pk_tbl") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  iso2_code        String    @db.Char(2)
+  iso3_code        String    @db.Char(3)
+  name             String    @db.VarChar(255)
+  nationality_name String?   @db.VarChar(255)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @db.Timestamptz(6)
+  person           person[]
+  region           region[]
+}
+
+model district {
+  id         String    @id(map: "pk_district") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  region_id  String    @db.Uuid
+  name       String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  commune    commune[]
+  region     region    @relation(fields: [region_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_district_region")
+}
+
+model document {
+  id                  String                @id(map: "pk_document") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  enrolment_id        String                @db.Uuid
+  document_type_id    String                @db.Uuid
+  front_file_path     String
+  back_file_path      String?
+  document_type       document_type         @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_document_type")
+  enrolment           enrolment             @relation(fields: [enrolment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_enrolment")
+  document_mrz        document_mrz[]
+  document_ocr_result document_ocr_result[]
+}
+
+model document_mrz {
+  id            String   @id(map: "pk_document_mrz") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id   String   @db.Uuid
+  raw_mrz       String
+  processed_at  DateTime @default(now()) @db.Timestamptz(6)
+  document_type document @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_mrz_document_type")
+}
+
+model document_ocr_result {
+  id               String   @id(map: "pk_document_ocr_result") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id      String   @db.Uuid
+  engine_name      String   @db.VarChar(255)
+  engine_version   String   @db.VarChar(255)
+  extracted_text   String
+  confidence_score Decimal  @default(0) @db.Decimal(5, 2)
+  processed_at     DateTime @default(now()) @db.Timestamptz(6)
+  document_type    document @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_ocr_result_document_type")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model document_type {
+  id                String            @id(map: "pk_document_type") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String            @db.VarChar(255)
+  description       String?
+  evidence_strength evidence_strength @default(WEAK)
+  requires_mrz      Boolean           @default(false)
+  supports_ocr      Boolean           @default(false)
+  requires_original Boolean           @default(true)
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?         @db.Timestamptz(6)
+  document          document[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enrolment {
+  id              String            @id(map: "pk_enrolment") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agent_id        String            @db.Uuid
+  citizen_id      String            @db.Uuid
+  application_id  String            @db.Uuid
+  created_offline Boolean           @default(false)
+  sync_status     Boolean           @default(false)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?         @db.Timestamptz(6)
+  enrolment_type  enrolment_type    @default(NEW)
+  document        document[]
+  agent           agent             @relation(fields: [agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_enrolment_agent")
+  citizen         citizen           @relation(fields: [citizen_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_enrolment_citizen")
+  face_biometrics face_biometrics[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model face_biometrics {
+  id              String    @id(map: "pk_face_biometrics") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  enrolment_id    String    @db.Uuid
+  image_file_path String
+  model_name      String    @db.VarChar(255)
+  model_version   String    @db.VarChar(255)
+  embeding        String
+  quality_score   Decimal   @default(0) @db.Decimal(5, 2)
+  face_detected   Boolean   @default(false)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @db.Timestamptz(6)
+  enrolment       enrolment @relation(fields: [enrolment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_face_biometrics_enrolment")
+}
+
+model fokontany {
+  id         String    @id(map: "pk_fokontany") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  commune_id String    @db.Uuid
+  name       String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  address    address[]
+  centre     centre[]
+  commune    commune   @relation(fields: [commune_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fokontany_commune")
+}
+
+model person {
+  id                  String           @id(map: "pk_person") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name          String?          @db.VarChar(255)
+  last_name           String           @db.VarChar(255)
+  date_of_birth       DateTime?        @db.Date
+  birth_place         String?          @db.VarChar(255)
+  id_country_of_birth String           @db.Uuid
+  sex                 sex
+  created_at          DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?        @db.Timestamptz(6)
+  date_of_death       DateTime?        @db.Date
+  address             address[]
+  agent               agent[]
+  citizen             citizen[]
+  contact_method      contact_method[]
+  country             country          @relation(fields: [id_country_of_birth], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_person_country")
+}
+
+model region {
+  id         String     @id(map: "pk_tbl_0") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  country_id String     @db.Uuid
+  name       String     @db.VarChar(255)
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?  @db.Timestamptz(6)
+  district   district[]
+  country    country    @relation(fields: [country_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_region_country")
+}
+
+model family_relationships {
+  id                                                      String            @id(map: "pk_family_relationships") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  citizen_id                                              String            @db.Uuid
+  related_person_id                                       String?           @db.Uuid
+  related_person_name                                     String?           @db.VarChar(255)
+  relationship_type                                       relationship_type
+  citizen_family_relationships_citizen_idTocitizen        citizen           @relation("family_relationships_citizen_idTocitizen", fields: [citizen_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_family_relationships_citizen")
+  citizen_family_relationships_related_person_idTocitizen citizen?          @relation("family_relationships_related_person_idTocitizen", fields: [related_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_family_relationships_citizen_0")
+}
+
+enum contact_type {
+  phone
+  email
+}
+
+enum enrolment_type {
+  NEW
+  UPDATE
+  CORRECTION
+}
+
+enum evidence_strength {
+  SUPERIOR
+  STRONG
+  FAIR
+  WEAK
+}
+
+enum occupancy_type {
+  OWNER
+  TENANT
+  FAMILY
+  OTHERS
+}
+
+enum sex {
+  M
+  F
+  Others
+}
+
+enum relationship_type {
+  FATHER
+  MOTHER
+  SPOUSE
+}
