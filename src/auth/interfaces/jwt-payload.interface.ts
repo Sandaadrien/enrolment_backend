@@ -1,6 +1,6 @@
 export interface JwtPayload {
-  sub: number;
+  sub: string;
   username: string;
-  roleId: number;
-  centreId: number;
+  roleId: string;
+  centreId: string;
 }

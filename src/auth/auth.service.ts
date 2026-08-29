@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
       throw new UnauthorizedException('Username ou mot de passe incorrect');
     }
 
-    const payload = {
+    const payload: JwtPayload = {
       sub: agent.id,
       username: agent.username,
       roleId: agent.id_application_role,
@@ -46,6 +47,49 @@ export class AuthService {
         username: agent.username,
         roleId: agent.id_application_role,
         centreId: agent.id_centre,
+      },
+    };
+  }
+
+  async getProfile(agentId: string) {
+    const agent = await this.prisma.agent.findUnique({
+      where: {
+        id: agentId,
+      },
+      include: {
+        application_role: true,
+        centre: true,
+        person: true,
+      },
+    });
+
+    if (!agent) {
+      throw new UnauthorizedException('Agent introuvable');
+    }
+
+    return {
+      id: agent.id,
+      username: agent.username,
+
+      role: {
+        id: agent.application_role.id,
+        name: agent.application_role.name,
+        description: agent.application_role.description,
+      },
+
+      centre: {
+        id: agent.centre.id,
+        code: agent.centre.code,
+        name: agent.centre.name,
+      },
+
+      person: {
+        id: agent.person.id,
+        first_name: agent.person.first_name,
+        last_name: agent.person.last_name,
+        date_of_birth: agent.person.date_of_birth,
+        birth_place: agent.person.birth_place,
+        sex: agent.person.sex,
       },
     };
   }
