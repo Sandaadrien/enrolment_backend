@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({
-    example: 'agent.ilafy.01',
+    example: 'agent.ankadikely.02',
     description: "Nom d'utilisateur de l'agent",
   })
   @IsString()
@@ -11,7 +11,7 @@ export class LoginDto {
   username!: string;
 
   @ApiProperty({
-    example: '123456',
+    example: 'abcdefgh',
     description: 'Mot de passe',
   })
   @IsString()

@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 
 jest.mock('bcrypt');
@@ -13,8 +14,10 @@ describe('AuthService', () => {
   let service: AuthService;
   let prisma: {
     agent: { findUnique: jest.Mock };
+    refresh_token: { create: jest.Mock };
   };
   let jwtService: { signAsync: jest.Mock };
+  let mailService: { sendPasswordResetOtp: jest.Mock };
 
   const agent = {
     id: 'agent-1',
@@ -27,14 +30,17 @@ describe('AuthService', () => {
   beforeEach(async () => {
     prisma = {
       agent: { findUnique: jest.fn() },
+      refresh_token: { create: jest.fn() },
     };
     jwtService = { signAsync: jest.fn() };
+    mailService = { sendPasswordResetOtp: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prisma },
         { provide: JwtService, useValue: jwtService },
+        { provide: MailService, useValue: mailService },
       ],
     }).compile();
 
@@ -55,6 +61,7 @@ describe('AuthService', () => {
       prisma.agent.findUnique.mockResolvedValue(agent);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       jwtService.signAsync.mockResolvedValue('signed-token');
+      prisma.refresh_token.create.mockResolvedValue({ id: 'rt-1' });
 
       const payload = {
         sub: agent.id,
@@ -63,16 +70,16 @@ describe('AuthService', () => {
         centreId: agent.id_centre,
       };
 
-      await expect(service.login(loginDto)).resolves.toEqual({
-        access_token: 'signed-token',
-        agent: {
-          id: agent.id,
-          username: agent.username,
-          roleId: agent.id_application_role,
-          centreId: agent.id_centre,
-        },
-      });
+      const result = await service.login(loginDto);
 
+      expect(result.access_token).toBe('signed-token');
+      expect(typeof result.refresh_token).toBe('string');
+      expect(result.agent).toEqual({
+        id: agent.id,
+        username: agent.username,
+        roleId: agent.id_application_role,
+        centreId: agent.id_centre,
+      });
       expect(prisma.agent.findUnique).toHaveBeenCalledWith({
         where: { username: loginDto.username },
       });
