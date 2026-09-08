@@ -1,43 +1,86 @@
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+
+import { Type } from 'class-transformer';
+
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+import { enrolment_type } from 'generated/prisma/enums';
+
+import { CreatePersonDto } from './create-person.dto';
+import { CreateAddressDto } from './create-address.dto';
+import { CreateContactDto } from './create-contact.dto';
+import { CreateFamilyRelationshipDto } from './create-family-relationship.dto';
+import { CreateDocumentDto } from './create-document.dto';
+import { CreateFaceBiometricDto } from './create-face-biometric.dto';
+
 export class CreateEnrolmentDto {
-  /* 
+  @ApiProperty({
+    type: CreatePersonDto,
+  })
+  @ValidateNested()
+  @Type(() => CreatePersonDto)
+  person!: CreatePersonDto;
 
-    nom de famille
-    date de naissance
-    lieu de naissance
-    face_image
-    face_vector_embedded
+  @ApiProperty({
+    type: CreateAddressDto,
+  })
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address!: CreateAddressDto;
 
-    pays (id)
-    region (id)
-    district (id)
-    commune (id)
-    fokontany (id)
+  @ApiPropertyOptional({
+    type: [CreateContactDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateContactDto)
+  contacts?: CreateContactDto[];
 
-    statut_resident_type (id)
-    addresse
+  @ApiPropertyOptional({
+    type: [CreateFamilyRelationshipDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateFamilyRelationshipDto)
+  relationships?: CreateFamilyRelationshipDto[];
 
-    nom du père
-    nom de la mère
+  @ApiProperty({
+    type: [CreateDocumentDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateDocumentDto)
+  documents!: CreateDocumentDto[];
 
-    //////// ( à parler avec les frontend)
-    agent_id
-    created_offline
-    enrolment_type ( NEW , UPDATE, CORRECTION)
-    modèle name (le ocr, na vérif mrz)
-    modèle version
-    quality score
-    face_detected
-    document type
+  @ApiPropertyOptional({
+    type: [CreateFaceBiometricDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateFaceBiometricDto)
+  face_biometrics?: CreateFaceBiometricDto[];
 
-    ?????????????????????
-    sex
-    national_unique_id ( numéro karapanondro )
-    type_contact
-    value_contact
+  @ApiPropertyOptional({
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  created_offline?: boolean;
 
-    À générer par le backend:
-    application_id (numéro d'enregistrement d'un dossier enrolment)
-    sync_status
-    created_at (pour tout les champs)
-  */
+  @ApiPropertyOptional({
+    enum: enrolment_type,
+    example: enrolment_type.NEW,
+  })
+  @IsOptional()
+  @IsEnum(enrolment_type)
+  enrolment_type?: enrolment_type;
 }
