@@ -16,7 +16,6 @@ export class EnrolmentController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   create(@Body() dto: CreateEnrolmentDto, @Req() req: Request) {
-    console.log('ito eehhh');
     const user = req.user as {
       sub: string;
     };

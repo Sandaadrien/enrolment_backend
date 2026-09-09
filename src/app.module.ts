@@ -12,6 +12,10 @@ import { FokontanyModule } from './fokontany/fokontany.module';
 import { CommuneModule } from './commune/commune.module';
 import { DistrictModule } from './district/district.module';
 import { FileModule } from './file/file.module';
+import { ReferencesModule } from './references/references.module';
+import { DocumentTypesService } from './document-types/document-types.service';
+import { DocumentTypesController } from './document-types/document-types.controller';
+import { DocumentTypesModule } from './document-types/document-types.module';
 
 @Module({
   imports: [
@@ -28,8 +32,10 @@ import { FileModule } from './file/file.module';
     CommuneModule,
     DistrictModule,
     FileModule,
+    ReferencesModule,
+    DocumentTypesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, DocumentTypesController],
+  providers: [AppService, DocumentTypesService],
 })
 export class AppModule {}

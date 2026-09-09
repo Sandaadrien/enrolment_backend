@@ -39,7 +39,7 @@ export class CreatePersonDto {
   birth_place?: string;
 
   @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    example: '9d4a3e6b-4971-4baa-94ea-aa42489a2c54',
   })
   @IsUUID()
   country_of_birth_id!: string;

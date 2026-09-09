@@ -183,16 +183,39 @@ export class EnrolmentService {
        */
 
       if (dto.relationships?.length) {
-        await tx.family_relationships.createMany({
-          data: dto.relationships.map((relationship) => ({
+        const relationshipsData: Prisma.family_relationshipsCreateManyInput[] =
+          [];
+
+        for (const relationship of dto.relationships) {
+          let relatedPersonId: string | null = null;
+
+          if (relationship.related_person_id) {
+            const relatedCitizen = await tx.citizen.findUnique({
+              where: {
+                id: relationship.related_person_id,
+              },
+            });
+
+            if (relatedCitizen) {
+              relatedPersonId = relatedCitizen.id;
+            } else {
+              console.log(
+                `Citizen ${relationship.related_person_id} not found. ` +
+                  `Relationship will be stored with name only.`,
+              );
+            }
+          }
+
+          relationshipsData.push({
             citizen_id: citizen.id,
-
-            related_person_id: relationship.related_person_id,
-
-            related_person_name: relationship.related_person_name,
-
+            related_person_id: relatedPersonId,
+            related_person_name: relationship.related_person_name ?? null,
             relationship_type: relationship.relationship_type,
-          })),
+          });
+        }
+
+        await tx.family_relationships.createMany({
+          data: relationshipsData,
         });
       }
 

@@ -12,7 +12,7 @@ export class CreateAddressDto {
   house_number!: string;
 
   @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    example: '33cc35a3-60ff-482c-9fc3-0e4dd7b7c60f',
   })
   @IsUUID()
   fokontany_id!: string;
