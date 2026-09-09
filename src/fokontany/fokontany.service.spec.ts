@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnrolmentService } from './enrolment.service';
+import { FokontanyService } from './fokontany.service';
 import { PrismaService } from '../prisma/prisma.service';
 
-describe('EnrolmentService', () => {
-  let service: EnrolmentService;
+describe('FokontanyService', () => {
+  let service: FokontanyService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EnrolmentService,
+        FokontanyService,
         {
           provide: PrismaService,
           useValue: {},
@@ -16,7 +16,7 @@ describe('EnrolmentService', () => {
       ],
     }).compile();
 
-    service = module.get<EnrolmentService>(EnrolmentService);
+    service = module.get<FokontanyService>(FokontanyService);
   });
 
   it('should be defined', () => {
