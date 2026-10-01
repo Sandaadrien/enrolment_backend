@@ -16,6 +16,9 @@ import { ReferencesModule } from './references/references.module';
 import { DocumentTypesService } from './document-types/document-types.service';
 import { DocumentTypesController } from './document-types/document-types.controller';
 import { DocumentTypesModule } from './document-types/document-types.module';
+import { DashboardService } from './dashboard/dashboard.service';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -34,8 +37,9 @@ import { DocumentTypesModule } from './document-types/document-types.module';
     FileModule,
     ReferencesModule,
     DocumentTypesModule,
+    DashboardModule,
   ],
-  controllers: [AppController, DocumentTypesController],
-  providers: [AppService, DocumentTypesService],
+  controllers: [AppController, DocumentTypesController, DashboardController],
+  providers: [AppService, DocumentTypesService, DashboardService],
 })
 export class AppModule {}
