@@ -1,13 +1,16 @@
 export class RecentActivityDto {
   applicantName!: string;
-  idReference!: string;
+  id!: string;
+  reference!: string;
   time!: string;
-  status!: 'Synced' | 'Local Only';
+  status!: 'synced' | 'local-only';
 }
-
-export class DashboardDto {
+class Stats {
   enrolmentsToday!: number;
   pendingSync!: number;
-  pendingSyncLabel!: string;
+}
+export class DashboardDto {
+  stats!: Stats;
+  // pendingSyncLabel!: string;
   recentActivity!: RecentActivityDto[];
 }

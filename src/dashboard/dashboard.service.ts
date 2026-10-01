@@ -66,22 +66,24 @@ export class DashboardService {
       return {
         applicantName,
 
-        idReference: enrolment.application_id,
-
+        id: enrolment.application_id,
+        reference: enrolment.application_id,
         time: enrolment.created_at.toLocaleTimeString('en-US', {
           hour: '2-digit',
           minute: '2-digit',
           hour12: true,
         }),
 
-        status: enrolment.sync_status ? 'Synced' : 'Local Only',
+        status: enrolment.sync_status ? 'synced' : 'local-only',
       };
     });
 
     return {
-      enrolmentsToday,
-      pendingSync,
-      pendingSyncLabel: 'dossiers',
+      stats: {
+        enrolmentsToday,
+        pendingSync,
+      },
+      // pendingSyncLabel: 'dossiers',
       recentActivity,
     };
   }

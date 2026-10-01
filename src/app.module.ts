@@ -16,7 +16,6 @@ import { ReferencesModule } from './references/references.module';
 import { DocumentTypesService } from './document-types/document-types.service';
 import { DocumentTypesController } from './document-types/document-types.controller';
 import { DocumentTypesModule } from './document-types/document-types.module';
-import { RecentActivityModule } from './recent-activity/recent-activity.module';
 import { DashboardService } from './dashboard/dashboard.service';
 import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -38,7 +37,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     FileModule,
     ReferencesModule,
     DocumentTypesModule,
-    RecentActivityModule,
     DashboardModule,
   ],
   controllers: [AppController, DocumentTypesController, DashboardController],
