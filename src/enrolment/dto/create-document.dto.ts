@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateDocumentDto {
   @ApiProperty({
-    example: '6851e3d4-ae17-4a93-a48e-1853a596367d',
+    example: '756c47a4-0409-4d0d-8aa9-125c05b76813',
   })
   @IsUUID()
   document_type_id!: string;

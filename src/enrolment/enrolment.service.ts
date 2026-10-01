@@ -33,7 +33,6 @@ export class EnrolmentService {
        * 2. Vérifier le pays de naissance
        * ==========================================
        */
-
       const country = await tx.country.findUnique({
         where: {
           id: dto.person.country_of_birth_id,
